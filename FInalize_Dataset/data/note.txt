@@ -1,0 +1,558 @@
+Perfect. If your goal is to do **Use Case #1 properly according to the complete ML lifecycle**, then don't start with modeling. Start like a Data Scientist.
+
+---
+
+# Business Problem Understanding
+
+### Business Question
+
+> For each NYC taxi zone, predict how many taxi pickups will occur in the next hour.
+
+Example:
+
+| Zone            | Current Hour | Predicted Next Hour Demand |
+| --------------- | ------------ | -------------------------- |
+| Midtown         | 2 PM         | 320                        |
+| JFK Airport     | 2 PM         | 180                        |
+| Upper East Side | 2 PM         | 90                         |
+
+This helps:
+
+* Drivers move to high-demand areas
+* Reduce passenger wait time
+* Increase driver earnings
+
+---
+
+# ML Problem Formulation
+
+This is a:
+
+### Supervised Learning Problem
+
+Target:
+
+```python
+demand
+```
+
+And specifically:
+
+### Time Series Forecasting
+
+because:
+
+```text
+Time → Demand
+```
+
+---
+
+# Dataset Understanding
+
+File:
+
+```python
+yellow_tripdata_2026-01.parquet
+```
+
+First thing:
+
+```python
+import pandas as pd
+
+df = pd.read_parquet("yellow_tripdata_2026-01.parquet")
+```
+
+Inspect:
+
+```python
+df.shape
+df.columns
+df.head()
+df.info()
+```
+
+---
+
+# Which Columns Are Needed?
+
+For Use Case #1
+
+Mandatory:
+
+```python
+tpep_pickup_datetime
+PULocationID
+```
+
+Ignore everything else initially.
+
+Why?
+
+Because demand means:
+
+> Number of pickups occurring in a zone at a given time.
+
+---
+
+# Data Cleaning
+
+Check:
+
+```python
+df.isnull().sum()
+```
+
+Remove:
+
+```python
+df = df.dropna(
+    subset=[
+        'tpep_pickup_datetime',
+        'PULocationID'
+    ]
+)
+```
+
+Check duplicates:
+
+```python
+df.duplicated().sum()
+```
+
+Remove:
+
+```python
+df = df.drop_duplicates()
+```
+
+---
+
+# Create Demand Dataset
+
+Raw data:
+
+| pickup_time | zone |
+| ----------- | ---- |
+| 10:01       | 161  |
+| 10:05       | 161  |
+| 10:15       | 161  |
+
+ML cannot learn from raw trips.
+
+Convert into:
+
+| hour  | zone | demand |
+| ----- | ---- | ------ |
+| 10:00 | 161  | 3      |
+
+---
+
+Create hourly bucket:
+
+```python
+df['hour'] = (
+    df['tpep_pickup_datetime']
+    .dt.floor('h')
+)
+```
+
+Aggregate:
+
+```python
+hourly_df = (
+    df.groupby(
+        ['hour','PULocationID']
+    )
+    .size()
+    .reset_index(name='demand')
+)
+```
+
+This is your forecasting dataset.
+
+---
+
+# Exploratory Data Analysis
+
+Before ML:
+
+### Total Demand Trend
+
+Plot:
+
+```python
+hourly_total = (
+    hourly_df.groupby('hour')
+    ['demand']
+    .sum()
+)
+```
+
+Questions:
+
+* Are mornings busy?
+* Are evenings busy?
+* Are weekends different?
+
+---
+
+### Top Demand Zones
+
+Find:
+
+```python
+hourly_df.groupby(
+    'PULocationID'
+)['demand'].sum()
+```
+
+Questions:
+
+* Which zones dominate demand?
+* Which zones rarely receive pickups?
+
+---
+
+# Feature Engineering
+
+This is the most important step.
+
+---
+
+## Time Features
+
+From hour:
+
+```python
+hour
+day
+weekday
+week
+month
+```
+
+Example:
+
+```python
+hourly_df['hour_of_day']
+hourly_df['day_of_week']
+```
+
+---
+
+## Weekend Feature
+
+```python
+hourly_df['is_weekend']
+```
+
+Reason:
+
+Demand patterns differ.
+
+---
+
+## Lag Features
+
+Most important feature.
+
+Previous demand predicts future demand.
+
+Example:
+
+| Hour | Demand |
+| ---- | ------ |
+| 10   | 100    |
+| 11   | 120    |
+| 12   | ?      |
+
+Create:
+
+```python
+lag_1
+lag_2
+lag_24
+```
+
+Meaning:
+
+| Feature | Meaning             |
+| ------- | ------------------- |
+| lag_1   | Previous hour       |
+| lag_24  | Same hour yesterday |
+
+Example:
+
+```python
+hourly_df['lag_1'] = (
+    hourly_df.groupby(
+        'PULocationID'
+    )['demand']
+    .shift(1)
+)
+```
+
+---
+
+## Rolling Features
+
+Create:
+
+```python
+rolling_mean_3
+rolling_mean_24
+```
+
+Example:
+
+```python
+hourly_df['rolling_24'] = (
+    hourly_df.groupby(
+        'PULocationID'
+    )['demand']
+    .transform(
+        lambda x:
+        x.shift(1)
+         .rolling(24)
+         .mean()
+    )
+)
+```
+
+Reason:
+
+Capture recent trend.
+
+---
+
+# Target Variable
+
+Predict:
+
+```python
+next_hour_demand
+```
+
+Create:
+
+```python
+hourly_df['target'] = (
+    hourly_df.groupby(
+        'PULocationID'
+    )['demand']
+    .shift(-1)
+)
+```
+
+Now:
+
+| Current Features | Target             |
+| ---------------- | ------------------ |
+| Hour t           | Demand at Hour t+1 |
+
+---
+
+# Train Test Split
+
+Never:
+
+```python
+train_test_split()
+```
+
+for time series.
+
+Wrong.
+
+---
+
+Correct:
+
+Suppose January has 31 days.
+
+```text
+1–25 Jan   → Train
+
+26–28 Jan  → Validation
+
+29–31 Jan  → Test
+```
+
+Chronological order must remain.
+
+---
+
+# Baseline Model
+
+First model:
+
+```python
+Linear Regression
+```
+
+Purpose:
+
+* Simple benchmark
+* Easy interpretation
+
+---
+
+# Advanced Models
+
+Then:
+
+### Random Forest
+
+```python
+RandomForestRegressor
+```
+
+---
+
+### XGBoost
+
+Best choice for this project.
+
+```python
+XGBRegressor
+```
+
+Usually performs very well on demand forecasting.
+
+---
+
+### LightGBM
+
+Optional.
+
+---
+
+# Model Evaluation
+
+Use:
+
+### MAE
+
+Measures average error.
+
+```python
+from sklearn.metrics import mean_absolute_error
+```
+
+---
+
+### RMSE
+
+Measures large errors.
+
+```python
+from sklearn.metrics import root_mean_squared_error
+```
+
+---
+
+# Model Comparison
+
+Create table:
+
+| Model             | MAE | RMSE |
+| ----------------- | --- | ---- |
+| Linear Regression | x   | x    |
+| Random Forest     | x   | x    |
+| XGBoost           | x   | x    |
+
+Choose best.
+
+---
+
+# Prediction Visualization
+
+Plot:
+
+```python
+Actual Demand
+vs
+Predicted Demand
+```
+
+For several zones.
+
+This is usually expected in project reviews.
+
+---
+
+# Business Insight Generation
+
+After prediction:
+
+Example:
+
+| Zone | Predicted Demand |
+| ---- | ---------------- |
+| 161  | 350              |
+| 236  | 280              |
+| 132  | 150              |
+
+Insights:
+
+* Zone 161 is expected to be busiest next hour.
+* Drivers should move toward Zone 161.
+* Fleet allocation can be adjusted.
+
+This connects forecasting to business value.
+
+---
+
+# Deliverables for Use Case #1
+
+By the end, you should have:
+
+```text
+1. Data Cleaning Pipeline
+
+2. Hourly Demand Dataset
+
+3. EDA Report
+
+4. Feature Engineering
+
+5. Forecasting Models
+
+6. Model Evaluation
+
+7. Prediction Visualizations
+
+8. Business Insights
+```
+
+### Recommended Folder Structure
+
+```text
+project/
+
+data/
+    yellow_tripdata_2026-01.parquet
+
+notebooks/
+    01_understanding_data.ipynb
+    02_eda.ipynb
+    03_feature_engineering.ipynb
+    04_model_training.ipynb
+
+src/
+    preprocess.py
+    feature_engineering.py
+    train.py
+    predict.py
+
+models/
+    xgboost.pkl
+
+reports/
+    eda_report.pdf
+    model_report.pdf
+```
+
+My recommendation: **don't write any model code yet.** First load the parquet file, inspect `df.columns`, `df.shape`, `df.info()`, and identify the exact columns available. Then move to building the hourly demand table. That's the foundation of the entire forecasting pipeline.

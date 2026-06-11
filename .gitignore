@@ -1,0 +1,16 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+
+models/
+/home/ed/Desktop/NYC_Taxi_Demand_Forecasting/YT_taxi_Frontend/.pytest_cache/
+
+Usecase_1(Demand_Forecasting)_Backend/models/
+Usecase_1(Demand_Forecasting)_Backend/venv/
+*.parquet
+*.csv
+*.pkl
+*.joblib
+.ipynb_checkpoints/
+__pycache__/
+venv/

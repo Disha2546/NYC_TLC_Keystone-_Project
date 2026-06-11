@@ -1,0 +1,13 @@
+# Data files
+*.parquet
+*.csv
+
+# Python
+venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# Model files
+*.pkl
+*.joblib
+*.h5

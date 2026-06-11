@@ -1,0 +1,53 @@
+# Core Data Handling
+pandas
+numpy
+pyarrow
+fastparquet
+
+# Visualization
+matplotlib
+seaborn
+plotly
+
+# Statistical Analysis
+scipy
+statsmodels
+
+# Machine Learning
+scikit-learn
+xgboost
+lightgbm
+catboost
+
+# Time Series Forecasting
+prophet
+pmdarima
+
+# Deep Learning
+tensorflow
+
+# Model Explainability
+shap
+
+# Progress Bars
+tqdm
+
+# Notebook Utilities
+jupyter
+ipykernel
+
+# Data Validation
+ydata-profiling
+
+# Geospatial Analysis
+geopandas
+folium
+
+# Dashboard Deployment
+streamlit
+
+# Model Serialization
+joblib
+
+# Environment Variables
+python-dotenv

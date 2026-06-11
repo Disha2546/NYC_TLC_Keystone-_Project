@@ -1,0 +1,132 @@
+/*
+
+Load Dataset
+↓
+Data Understanding
+↓
+Missing Values Analysis
+↓
+Duplicate Analysis
+↓
+Data Type Analysis
+↓
+Numerical Statistics
+↓
+Correlation Analysis
+↓
+Outlier Detection
+↓
+Time Coverage Analysis
+↓
+Zone Coverage Analysis
+↓
+Demand Creation
+↓
+Demand EDA
+↓
+Feature Engineering
+↓
+Save Final Dataset
+
+*/
+
+df = pd.read_parquet(
+    "/home/ed/Desktop/TS-Forecasting/data/yellow_tripdata_2026-01.parquet"
+)
+
+# Without Copy Later its show :SettingWithCopyWarning
+forecast_df = df[
+    ['tpep_pickup_datetime', 'PULocationID']
+].copy()
+
+# Reason:To group trips by hour for demand forecasting.
+forecast_df['hour'] = (
+    forecast_df['tpep_pickup_datetime']
+    .dt.floor('h')
+)
+
+# Create the hourly demand dataset:
+hourly_demand = (
+    forecast_df
+    .groupby(['hour', 'PULocationID'])
+    .size()
+    .reset_index(name='demand')
+)
+print(hourly_demand.sample(20))
+
+# To understand how demand values are distributed.
+import matplotlib.pyplot as plt
+hourly_demand['demand'].hist()
+
+plt.title('Distribution of Hourly Demand')
+plt.xlabel('Demand')
+plt.ylabel('Frequency')
+plt.show()
+
+# Top 10 Pickup Zones
+top_zones = (
+    hourly_demand
+    .groupby('PULocationID')['demand']
+    .sum()
+    .sort_values(ascending=False)
+    .head(10)
+)
+
+top_zones.plot(kind='bar')
+
+plt.title('Top 10 Pickup Zones')
+plt.xlabel('Zone ID')
+plt.ylabel('Total Demand')
+plt.show()
+
+
+hourly_demand['hour_of_day'] = (
+    hourly_demand['hour'].dt.hour
+)
+
+# Analyze Hourly Demand Pattern
+avg_hourly_demand = (
+    hourly_demand
+    .groupby('hour_of_day')['demand']
+    .mean()
+)
+avg_hourly_demand
+# On average, which hours of the day have the highest taxi demand?
+
+
+plt.figure(figsize=(10, 5))
+avg_hourly_demand.plot(marker='o')
+
+plt.title('Average Taxi Demand by Hour of Day')
+plt.xlabel('Hour of Day')
+plt.ylabel('Average Demand')
+plt.grid(True)
+
+plt.show()
+
+
+hourly_demand['day_of_week'] = (
+    hourly_demand['hour'].dt.day_name()
+)
+
+# Average Taxi Demand by Day of Week
+days_order = [
+    'Monday', 'Tuesday', 'Wednesday',
+    'Thursday', 'Friday', 'Saturday', 'Sunday'
+]
+
+avg_day_demand = (
+    hourly_demand
+    .groupby('day_of_week')['demand']
+    .mean()
+    .reindex(days_order)
+)
+
+plt.figure(figsize=(10, 5))
+avg_day_demand.plot(kind='bar')
+
+plt.title('Average Taxi Demand by Day of Week')
+plt.xlabel('Day')
+plt.ylabel('Average Demand')
+
+plt.show()
