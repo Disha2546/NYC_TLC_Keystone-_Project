@@ -1,12 +1,13 @@
 from fastapi import FastAPI
 
-from schemas.forecast_schema import (
-    ForecastRequest
-)
+from schemas.forecast_schema import ForecastRequest
+from schemas.trip_schema import TripRequest
 
 from services.forecasting_service import (
     generate_forecast
 )
+
+from services.trip_prediction import predict_trip_fare_and_duration
 
 app = FastAPI(
     title="NYC Taxi Demand Forecasting API"
@@ -33,3 +34,15 @@ def forecast(
 
     return forecasts
 
+
+@app.post("/predict-trip")
+def predict_trip(request: TripRequest):
+
+    try:
+        result = predict_trip_fare_and_duration(request.dict())
+        return result
+
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
