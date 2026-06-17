@@ -1,29 +1,56 @@
 import joblib
 import pandas as pd
-import os
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
-fare_obj = joblib.load(
-    os.path.join(BASE_DIR, "models", "fare_prediction_pipeline.pkl")
-)
-
-duration_model = joblib.load(
-    os.path.join(BASE_DIR, "models", "final_xgboost_model.pkl")
-)
-
-# 🔥 FIX HERE
-fare_model = fare_obj["model"]
+# Load duration model
+duration_model = joblib.load("models/xgb_optimized_model.pkl")
 
 
-def predict_trip_fare_and_duration(data: dict):
+def build_features(input_data: dict):
 
-    X = pd.DataFrame([data])
+    df = pd.DataFrame([input_data])
 
-    fare = fare_model.predict(X)[0]
-    duration = duration_model.predict(X)[0]
+    df["Location_Pair"] = (
+        df["PULocationID"].astype(str)
+        + "_"
+        + df["DOLocationID"].astype(str)
+    )
+
+    if "pickup_day" not in df:
+        df["pickup_day"] = 15     # default day of month
+
+    if "pickup_dayofweek" not in df:
+        df["pickup_dayofweek"] = 2
+
+    if "pickup_month" not in df:
+        df["pickup_month"] = 6
+
+    if "is_weekend" not in df:
+        df["is_weekend"] = 0
+
+    if "is_night" not in df:
+        df["is_night"] = 0
+
+    if "is_rush_hour" not in df:
+        df["is_rush_hour"] = 1
+
+    if "RatecodeID" not in df:
+        df["RatecodeID"] = 1
+
+    if "cbd_congestion_fee" not in df:
+        df["cbd_congestion_fee"] = 0.0
+
+    return df
+
+
+def predict_trip_duration(input_data):
+    """
+    input_data is already a dict.
+    """
+
+    X = build_features(input_data)
+
+    prediction = duration_model.predict(X)[0]
 
     return {
-        "fare": round(float(fare), 2),
-        "duration_minutes": round(float(duration), 2)
+        "predicted_duration": float(prediction)
     }

@@ -2,12 +2,14 @@ from fastapi import FastAPI
 
 from schemas.forecast_schema import ForecastRequest
 from schemas.trip_schema import TripRequest
+from schemas.hotspot_schema import HotspotRequest
 
-from services.forecasting_service import (
-    generate_forecast
-)
+from services.forecasting_service import generate_forecast
+from services.trip_prediction import predict_trip_duration
+from services.hotspot_services import get_hotspots
 
-from services.trip_prediction import predict_trip_fare_and_duration
+from schemas.driver_positioning_schema import DriverPositioningRequest
+from services.driver_positioning_service import DriverPositioningService
 
 app = FastAPI(
     title="NYC Taxi Demand Forecasting API"
@@ -35,14 +37,53 @@ def forecast(
     return forecasts
 
 
-@app.post("/predict-trip")
-def predict_trip(request: TripRequest):
+from schemas.trip_schema import TripRequest
+from services.trip_prediction import predict_trip_duration
+
+@app.post("/predict-duration")
+def predict_duration_api(request: TripRequest):
 
     try:
-        result = predict_trip_fare_and_duration(request.dict())
+        input_data = request.model_dump()
+
+        result = predict_trip_duration(input_data)
+
         return result
 
     except Exception as e:
         return {
             "error": str(e)
         }
+    
+
+@app.post("/hotspots")
+def hotspots(
+    request: HotspotRequest
+):
+
+    try:
+        results = get_hotspots(request.top_n)
+
+        return {
+            "hotspots": results
+        }
+
+    except Exception as e:
+
+        return {
+            "error": str(e)
+        }
+    
+
+driver_service = DriverPositioningService()
+
+@app.post("/recommend-driver-position")
+def recommend_driver_position(
+    request: DriverPositioningRequest
+):
+
+    result = driver_service.compute_positioning(
+        request.model_dump()
+    )
+
+    return result

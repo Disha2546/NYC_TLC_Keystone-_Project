@@ -4,7 +4,9 @@ import pandas as pd
 
 def show_fare_page():
 
-    st.title("🚕 Trip Fare + Duration Prediction")
+    st.title("⏱️ Trip Duration Prediction")
+
+    st.write("Predict the estimated trip duration for NYC taxi rides.")
 
     passenger_count = st.number_input("Passenger Count", 1, 6, 1)
     trip_distance = st.number_input("Trip Distance", 0.1, 50.0, 2.0)
@@ -24,7 +26,7 @@ def show_fare_page():
 
         try:
             response = requests.post(
-                "http://127.0.0.1:8000/predict-trip",
+                "http://127.0.0.1:8000/predict-duration",
                 json=payload
             )
 
@@ -33,16 +35,40 @@ def show_fare_page():
             st.write("Raw Response:", response.text)
 
             # ❌ SAFETY CHECK (prevents JSON crash)
-            if response.status_code != 200:
-                st.error("Backend error occurred")
-                st.stop()
+            if response.status_code == 200:
+                result = response.json()
 
-            result = response.json()   # ✅ FIXED
+                if "predicted_duration" in result:
 
-            st.subheader("Prediction Result")
+                    duration = result["predicted_duration"]
 
-            st.metric("Estimated Fare ($)", result["fare"])
-            st.metric("Estimated Duration (min)", result["duration_minutes"])
+                    st.success(
+                        f"Estimated Trip Duration: {duration:.2f} minutes"
+                    )
+
+                    st.metric(
+                        "Predicted Duration (minutes)",
+                        f"{duration:.2f}"
+                    )
+
+                elif "error" in result:
+
+                    st.error(result["error"])
+
+                else:
+
+                    st.error("Unexpected API response.")
+
+            else:
+
+                st.error(
+                    f"API Error ({response.status_code})"
+                )
+
+                st.write(response.text)
 
         except Exception as e:
-            st.error(f"Request failed: {e}")
+
+            st.error(
+                f"Connection Failed: {str(e)}"
+            )

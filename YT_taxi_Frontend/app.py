@@ -2,6 +2,8 @@ import streamlit as st
 
 from pages.demand_forecasting import show_forecasting_page
 from pages.fare_prediction import show_fare_page 
+from pages.hotspot_detection import show_hotspot_page
+from pages.driver_positioning import run_app
 
 st.set_page_config(
 
@@ -18,10 +20,16 @@ page = st.sidebar.radio(
     "Select Use Case",
 
     [
-        "Taxi Demand Forecasting",
-        "Fare + Duration Prediction" 
-    ]
 
+        "Taxi Demand Forecasting",
+
+        "Fare + Duration Prediction",
+
+        "Pickup Hotspot Detection",
+
+        "Driver Position Recommendation"
+
+    ]
 )
 
 if page == "Taxi Demand Forecasting":
@@ -29,3 +37,9 @@ if page == "Taxi Demand Forecasting":
 
 elif page == "Fare + Duration Prediction":
     show_fare_page()
+
+elif page == "Pickup Hotspot Detection":
+    show_hotspot_page()
+
+elif page == "Driver Position Recommendation":
+    run_app()
