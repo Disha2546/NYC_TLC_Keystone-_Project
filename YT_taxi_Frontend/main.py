@@ -11,6 +11,11 @@ from services.hotspot_services import get_hotspots
 from schemas.driver_positioning_schema import DriverPositioningRequest
 from services.driver_positioning_service import DriverPositioningService
 
+from schemas.anomaly_schema import AnomalyRequest, AnomalyResponse
+from services.anomaly_service import AnomalyService
+
+
+
 app = FastAPI(
     title="NYC Taxi Demand Forecasting API"
 )
@@ -87,3 +92,36 @@ def recommend_driver_position(
     )
 
     return result
+
+service = None
+
+
+@app.on_event("startup")
+def load_model():
+    global service
+    service = AnomalyService()
+
+
+@app.post("/anomaly/predict", response_model=AnomalyResponse)
+def detect_anomaly(request: AnomalyRequest):
+    return service.predict(request)
+
+@app.get("/live-demand")
+def live_demand():
+    """
+    Simulated real-time demand (you can later replace with DB or streaming data)
+    """
+
+    import random
+
+    zones = [f"Zone {i}" for i in range(1, 11)]
+
+    data = [
+        {
+            "zone": zone,
+            "demand": random.randint(20, 200)
+        }
+        for zone in zones
+    ]
+
+    return data

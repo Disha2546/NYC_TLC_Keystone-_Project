@@ -4,6 +4,7 @@ from pages.demand_forecasting import show_forecasting_page
 from pages.fare_prediction import show_fare_page 
 from pages.hotspot_detection import show_hotspot_page
 from pages.driver_positioning import run_app
+from pages.anomaly_detection import show_anomaly_page
 
 st.set_page_config(
 
@@ -27,7 +28,9 @@ page = st.sidebar.radio(
 
         "Pickup Hotspot Detection",
 
-        "Driver Position Recommendation"
+        "Driver Position Recommendation",
+
+        "Anomaly Detection"
 
     ]
 )
@@ -43,3 +46,6 @@ elif page == "Pickup Hotspot Detection":
 
 elif page == "Driver Position Recommendation":
     run_app()
+
+elif page == "Anomaly Detection":
+    show_anomaly_page()
