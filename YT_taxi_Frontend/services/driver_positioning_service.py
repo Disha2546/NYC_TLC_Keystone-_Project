@@ -34,11 +34,12 @@ class DriverPositioningService:
             reverse=True
         )
 
+       
+        if not results:
+            return {
+                "current_zone": current_zone,
+                "recommended_zone": best["zone"],
+                "score": best["score"],
+                "top_zones": results[:3]
+            }
         best = results[0]
-
-        return {
-            "current_zone": current_zone,
-            "recommended_zone": best["zone"],
-            "score": best["score"],
-            "top_zones": results[:3]
-        }

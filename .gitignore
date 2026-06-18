@@ -4,9 +4,10 @@ __pycache__/
 
 models/
 /home/ed/Desktop/NYC_Taxi_Demand_Forecasting/YT_taxi_Frontend/.pytest_cache/
-
+/home/ed/Desktop/NYC_Taxi_Demand_Forecasting/YT_taxi_Frontend/models/
 Usecase_1(Demand_Forecasting)_Backend/models/
 Usecase_1(Demand_Forecasting)_Backend/venv/
+/home/ed/Desktop/NYC_Taxi_Demand_Forecasting/USECASE5_Anomaly Detection/models/
 *.parquet
 *.csv
 *.pkl

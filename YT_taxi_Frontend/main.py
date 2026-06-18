@@ -13,7 +13,7 @@ from services.driver_positioning_service import DriverPositioningService
 
 from schemas.anomaly_schema import AnomalyRequest, AnomalyResponse
 from services.anomaly_service import AnomalyService
-
+from services.dashboard_service import DashboardService
 
 
 app = FastAPI(
@@ -106,22 +106,30 @@ def load_model():
 def detect_anomaly(request: AnomalyRequest):
     return service.predict(request)
 
-@app.get("/live-demand")
-def live_demand():
-    """
-    Simulated real-time demand (you can later replace with DB or streaming data)
-    """
 
-    import random
+dashboard_service = DashboardService()
 
-    zones = [f"Zone {i}" for i in range(1, 11)]
+@app.get("/dashboard")
+def dashboard():
 
-    data = [
-        {
-            "zone": zone,
-            "demand": random.randint(20, 200)
-        }
-        for zone in zones
-    ]
+    return dashboard_service.get_dashboard_data()
 
-    return data
+# @app.get("/live-demand")
+# def live_demand():
+#     """
+#     Simulated real-time demand (you can later replace with DB or streaming data)
+#     """
+
+#     import random
+
+#     zones = [f"Zone {i}" for i in range(1, 11)]
+
+#     data = [
+#         {
+#             "zone": zone,
+#             "demand": random.randint(20, 200)
+#         }
+#         for zone in zones
+#     ]
+
+#     return data

@@ -5,6 +5,7 @@ from pages.fare_prediction import show_fare_page
 from pages.hotspot_detection import show_hotspot_page
 from pages.driver_positioning import run_app
 from pages.anomaly_detection import show_anomaly_page
+from pages.real_time_dashboard import show_dashboard_page
 
 st.set_page_config(
 
@@ -30,7 +31,9 @@ page = st.sidebar.radio(
 
         "Driver Position Recommendation",
 
-        "Anomaly Detection"
+        "Anomaly Detection",
+
+        "Real-Time Analytics Dashboard"
 
     ]
 )
@@ -49,3 +52,6 @@ elif page == "Driver Position Recommendation":
 
 elif page == "Anomaly Detection":
     show_anomaly_page()
+
+elif page == "Real-Time Analytics Dashboard":
+    show_dashboard_page()

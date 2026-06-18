@@ -1,5 +1,7 @@
 🚖 NYC Taxi Demand Forecasting & Real-Time Decision Support System
+
 📄 Project Report
+
 1. 📌 Abstract
 
 Urban taxi systems generate large volumes of spatio-temporal data that can be leveraged to improve demand prediction, optimize driver allocation, and enhance operational efficiency. This project presents an end-to-end machine learning-based system for NYC taxi demand forecasting, trip analysis, anomaly detection, hotspot identification, and real-time decision support.
@@ -22,6 +24,8 @@ Identifies high-demand hotspots
 Detects anomalies in trip patterns
 Optimizes driver positioning
 Provides real-time analytics for decision-making
+
+
 3. 🧠 Objectives
 To forecast taxi demand using historical data
 To predict trip duration based on trip attributes
@@ -29,6 +33,8 @@ To identify spatial hotspots of demand
 To detect anomalies in taxi activity
 To recommend optimal driver positioning
 To build a real-time analytics dashboard
+
+
 4. 🏗️ System Architecture
 
 The system follows a layered architecture:
@@ -50,6 +56,8 @@ Pandas, NumPy (Data Processing)
 Scikit-learn / XGBoost (ML Models)
 Plotly (Visualization)
 Joblib (Model Serialization)
+
+
 6. 📊 Modules Implemented
 6.1 Taxi Demand Forecasting
 
@@ -92,6 +100,8 @@ Forecast trends
 Hotspot heatmaps
 Anomaly alerts
 Driver recommendation system
+
+
 7. 🔄 System Workflow
 Raw taxi data is processed and feature-engineered
 ML models are trained and saved
@@ -99,6 +109,8 @@ FastAPI loads models and exposes endpoints
 Streamlit dashboard consumes APIs
 Real-time analytics are displayed
 Decision support is generated dynamically
+
+
 8. 📡 API Endpoints
 /forecast → Demand forecasting
 /predict-duration → Trip duration prediction
@@ -106,6 +118,8 @@ Decision support is generated dynamically
 /anomaly/predict → Anomaly detection
 /recommend-driver-position → Driver optimization
 /live-demand → Real-time demand snapshot
+
+
 9. 📈 Results
 
 The system successfully:
@@ -127,12 +141,16 @@ Forecast line chart
 Heatmap of taxi hotspots
 Live anomaly alerts
 Decision recommendation panel
+
+
 11. 🚀 Key Features
 End-to-end ML pipeline
 Real-time API-based architecture
 Interactive dashboard
 Modular service-based backend
 Decision support system
+
+
 12. 📌 Conclusion
 
 This project demonstrates a complete machine learning-driven decision support system for urban taxi demand management. By integrating predictive analytics with real-time visualization, the system helps optimize driver allocation and improve operational efficiency.
